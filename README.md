@@ -79,8 +79,7 @@ ready: function() {
 And the rest is magic, so let's enjoy it!
 
 Here's how to make a call to an endpoint:
-In another element, you'll want to import your \<my-api\> element so you can use it! So assuming you've done that,
-stick your api-element in the template, give in an id, say, "myApi".
+In another element, you'll want to import your \<my-api\> element and stick it in the template. Give it an id, say, "myApi".
 
 Now make calls to your endpoints like this:
 
@@ -106,5 +105,17 @@ myApiElement.myEndpointName(bodyObject,callback[,parametersObject]);
 ```
 
 The callback will receive a response object and api-behavior assumes you'll be receiving JSON from the server.
+
+Another example:
+```javascript
+attached: function() {
+  this.$.myApi.getRealData(function(response){
+    console.log(response);
+  }, {
+    param1: "thisIsAValue",
+    param2: "o3rjhg93jth894hjtg924jg3589hjgi8jgiu349jg9348hgj894ghfj928gh876g4f6823dg7523fxrwcx64wxfd26vghr3bj4t9kn50ml680ko807jk596jgu34hfy2gc72eghfu3nt49hj358ghu24bfu32gc612vfdt12fdg713hf248hvu34hv82jiw1jd8123hf"
+  });
+}
+```
 
 6 ) That's it! =)
