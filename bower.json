@@ -1,0 +1,30 @@
+{
+  "name": "yarn-api-behavior",
+  "version": "0.1.0",
+  "keywords": [
+    "web-components",
+    "polymer",
+    "ajax",
+    "sdk",
+    "api"
+  ],
+  "license": "MIT",
+  "description": "Polymer v1 API integration aid",
+  "authors": [
+    "William S. Woodruff <williamswoodruff@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/WilliamSWoodruff/APIBehavior.git"
+  },
+  "main": "yarn-api-behavior.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "polymerelements/iron-component-page#^1.0.0",
+    "test-fixture": "polymerelements/test-fixture#^1.0.0",
+    "web-component-tester": "*",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  }
+}

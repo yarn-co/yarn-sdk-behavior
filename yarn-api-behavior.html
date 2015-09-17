@@ -1,0 +1,203 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script>
+var YarnBehaviors = YarnBehaviors || {};
+
+(function() {
+
+/**
+  For use with yarn-endpoints-behavior,
+  must be added to your behaviors array AFTER the
+  yarn-endpoints-behavior has been added.
+  
+*/
+
+YarnBehaviors.APIBehavior = {
+  
+  properties: {
+    callbacks: {
+      type: Object,
+      value: {}
+    },
+    url: {
+      type: String,
+      observer: '_onUrlChange'
+    },
+    body: {
+      type: Object,
+      observer: '_onBodyChange'
+    },
+    params: {
+      type: Object,
+      observer: '_onParamsChange'
+    },
+    endpoints: {
+      type: Object,
+      observer: '_onEndpointsChange'
+    },
+    headers: {
+      type: Object,
+      observer: '_onHeadersChange'
+    },
+    defaultHost: {
+      type: String,
+      value: 'localhost:3001'
+    },
+    defaultProtocol: {
+      type: String,
+      value: 'http'
+    }
+  },
+  
+  listeners: {
+    'ajax.response': '_handleAjaxResponse'
+  },
+  
+  _handleAjaxResponse: function(e, request) {
+    if(!this.url) {
+      /*
+        At the beginning ajax makes a dummy call 
+        because auto is true and I'm setting 
+        the id as an attribute (I think that's whats
+        going on at least)
+      */
+      return;
+    }
+    var cb = this.callbacks[request.xhr.responseURL];
+    if(request.status === 200) {
+      if(cb) {
+        cb(e.detail.response);// call the callback with results
+      } else {
+        console.warn("No callback set for " + request.xhr.responseURL + " call");
+      }
+    } else {
+      if(cb) {
+        var failMessage = "The ajax failed =(";
+        console.warn(failMessage);
+        cb(failMessage);
+      }
+    }
+    delete this.callbacks[request.xhr.responseURL];
+  },
+  
+  attached: function() {
+    // Trying to avoid having to set the id to "ajax" in parent
+    
+    // var ajax = Polymer.dom(this.root).querySelector("iron-ajax");
+    // console.log(ajax);
+    
+    this.$.ajax.set('handleAs', 'json');
+    this.$.ajax.set('debounceDuration', 300);
+    this.$.ajax.set('auto', true);
+    
+  },
+  
+  _onEndpointsChange: function() {
+    this._makeApi();
+  },
+  
+  _onUrlChange: function(newVal, oldVal) {
+    this.$.ajax.set('url', newVal);
+  },
+  
+  _onBodyChange: function(newVal, oldVal) {
+    this.$.ajax.set('body', newVal);
+  },
+  
+  _onHeadersChange: function(newVal, oldVal) {
+    this.$.ajax.set('headers', newVal);
+  },
+  
+  _onParamsChange: function(newVal, oldVal) {
+    this.$.ajax.set('params', newVal);
+  },
+  
+  _makeApi: function() {
+    var self = this;
+    Object.keys(this.endpoints).forEach(function(endpoint) {
+      switch(self.endpoints[endpoint].method) {
+        case "GET":
+          // Creating a function on the element that matches the endpoint's name
+          self[endpoint] = function(cb, params) {
+            self.body = null;
+            if(params) {
+              self.params = params;
+            } else {
+              self.params = {};
+            }
+            if(self.endpoints[endpoint].host) {
+              self.host = self.endpoints[endpoint].host;
+            } else {
+              self.host = self.defaultHost;
+            }
+            if(self.endpoints[endpoint].headers) {
+              self.headers = self.endpoints[endpoint].headers;
+            } else {
+              self.headers = {};
+            }
+            if(self.endpoints[endpoint].protocol) {
+              self.protocol = self.endpoints[endpoint].protocol;
+            } else {
+              self.protocol = self.defaultProtocol;
+            }
+            
+            self.endpoint = endpoint;
+            self.callbacks[self.url] = cb;
+          }
+          break;
+        case "POST":
+        case "PUT":
+        case "DELETE":
+          // Creating a function on the element that matches the endpoint's name
+          self[endpoint] = function(body, cb, params) {
+            if(!body) {
+              throw new Error('POST "' + endpoint + '" needs a body!');
+            }
+            self.body = JSON.stringify(body);
+            if(params) {
+              self.params = params;
+            } else {
+              self.params = {};
+            }
+            if(self.endpoints[endpoint].host) {
+              self.host = self.endpoints[endpoint].host;
+            } else {
+              self.host = self.defaultHost;
+            }
+            if(self.endpoints[endpoint].headers) {
+              self.headers = self.endpoints[endpoint].headers;
+            } else {
+              self.headers = {};
+            }
+            if(self.endpoints[endpoint].protocol) {
+              self.protocol = self.endpoints[endpoint].protocol;
+            } else {
+              self.protocol = self.defaultProtocol;
+            }
+            self.endpoint = endpoint;
+            self.callbacks[self.url] = cb;
+          }
+          break;
+      }
+      
+      if(!self.host) {
+        self.host = self.defaultHost;
+      }
+      
+      // Simulate latency if host contains 'localhost:300'
+      // monkeypatch
+      if(self.host.indexOf("localhost:300") !== -1) {
+        console.warn("If you notice ajax responses are slow that's because APIBehavior is simulating latency if the host contains localhost:300");
+        var currentFunc = self[endpoint];
+        self[endpoint] = function(cb, params) {
+          setTimeout(function() {
+            currentFunc(cb, params);
+          }, 300);
+        }
+      }
+    });
+  }
+};
+
+})()
+</script>
