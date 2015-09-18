@@ -59,6 +59,15 @@ ready: function() {
 ```
 ---
 
+## Headers
+If you want to set headers for your calls, you'll have to write a function in your api element that sets the 'headers' property that api-behavior exposes. api-behavior resets the headers to {} after each endpoint call
+right now but maybe that's not the best idea I'm not sure. So call this function right before calling your endpoint, it'll set the headers, then make your call with those headers.
+Example:
+```javascript
+setHeadersForNextCall: function(headersObj) {
+  this.set('headers', headersObj);
+}
+```
 
 ## Making calls to endpoints
 
@@ -102,6 +111,7 @@ attached: function() {
     console.log(res);
   });
   
+  this.$.myApi.setHeadersForNextCall({Authorization: "JSONWebToken--lajjfkljdLKASJDFUHFIf28283rji93jfj32dJI2EFSDFJK13"})
   this.$.myApi.getRealData(function(res){
     console.log(res);
   }, {
