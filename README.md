@@ -21,7 +21,6 @@ ready: function() {
       path: '/get/some/local/json/file.json'
     },
     getRealData: {
-      protocol: 'http',
       host: 'websiteWithRealData.com',
       method: 'GET',
       path: '/path/to/endpoint'
