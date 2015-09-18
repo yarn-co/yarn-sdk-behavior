@@ -116,11 +116,11 @@ myApiElement.myEndpointName(body).then(function(request){
 attached: function() {
 
   this.$.myApi.setHeaders({Authorization: "JSONWebToken--lajjfkljdLKSFIf28283rji93..."});
-  this.$.myApi.getRealData().then(function(req){
-    console.log(req.xhr.response);
-  }, {
+  this.$.myApi.getRealData({
     param1: "aValue1",
     param2: "aValue2"
+  }).then(function(req){
+    console.log(req.xhr.response);
   });
   
   this.$.myApi.setHeaders({});
