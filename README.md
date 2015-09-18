@@ -116,19 +116,21 @@ myApiElement.myEndpointName(body).then(function(request){
 ## More examples:
 ```javascript
 attached: function() {
-  this.$.myApi.postSomething({
-    aKey: "aValue"
-  },
-  function(res) {
-    console.log(res);
-  });
-  
-  this.$.myApi.setHeadersForNextCall({Authorization: "JSONWebToken--lajjfkljdLKSFIf28283rji93..."});
+
+  this.$.myApi.setHeaders({Authorization: "JSONWebToken--lajjfkljdLKSFIf28283rji93..."});
   this.$.myApi.getRealData().then(function(req){
     console.log(req.xhr.response);
   }, {
     param1: "aValue1",
     param2: "aValue2"
+  });
+  
+  this.$.myApi.setHeaders({});
+  this.$.myApi.postSomething({
+    aKey: "aValue"
+  },
+  function(res) {
+    console.log(res);
   });
 }
 ```
