@@ -60,8 +60,7 @@ ready: function() {
 ---
 
 ## Headers
-If you want to set headers for your endpoints, you'll have to write a function in your api element that sets the 'headers' property that api-behavior exposes. api-behavior resets the headers to {} after each endpoint call
-right now but maybe that's not the best idea I'm not sure. So call this function right before calling your endpoint, it'll set the headers, then make your call with those headers.
+If you want to set headers for your endpoints, you'll have to write a function in your api element that sets the 'headers' property that api-behavior exposes. Call this function right before calling your endpoint, it'll set the headers, then make your call with those headers. Right now you'll have to set the headers before each call you make to ensure the headers aren't the ones intended for the most recent call you made, whether you want them to have something or be set to default {}
 Example:
 ```javascript
 setHeadersForNextCall: function(headersObj) {
