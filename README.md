@@ -79,28 +79,42 @@ setHeadersForNextCall: function(headersObj) {
 
 ```javascript
 attached: function() {
-  this.$.myApi.getFakeData(function(response){
-    console.log(response);
+  this.$.myApi.getFakeData(function(request){
+    console.log(request.xhr.response);
   });
 }
 ```
 
-If your endpoint method was GET, then the function will have these arguments--
+If your endpoint method was GET, then the function can have these arguments--
 ```javascript
-myApiElement.myEndpointName(callback[,parametersObject]);
-// 'callback' is required, 'parameters' is optional
+// We support function overloading
+myApiElement.myEndpointName(parameters, callback);
+myApiElement.myEndpointName(callback);
 ```
 If your endpoint method was POST, PUT, or DELETE, the function will have these arguments--
 ```javascript
-myApiElement.myEndpointName(body,callback[,parametersObject]);
+// Function overloading
+myApiElement.myEndpointName(body, parameters, callback);
+myApiElement.myEndpointName(body, callback);
 // 'body', 'callback' are required, 'parameters' is optional
 ```
 
-The callback will receive a response object and api-behavior assumes you'll be receiving JSON from the server.
+The callback will receive a request object, which has an xhr property, and api-behavior assumes you'll be receiving JSON from the server.
 If you want the response to be a different type, then put the response type in a 'handleAs' property for that
 endpoint.
 
-More examples:
+### Support for Promises!
+You can optionally receive a promise returned from your api function, use it like this:
+```javascript
+// For a post
+myApiElement.myEndpointName(body).then(function(request){
+  console.log(request.xhr.response);
+})
+```
+
+
+
+### More examples:
 ```javascript
 attached: function() {
   this.$.myApi.postSomething(
