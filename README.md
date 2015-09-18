@@ -95,7 +95,6 @@ If your endpoint method was POST, PUT, or DELETE, the function will have these a
 // Function overloading
 myApiElement.myEndpointName(body, parameters, callback);
 myApiElement.myEndpointName(body, callback);
-// 'body', 'callback' are required, 'parameters' is optional
 ```
 
 The callback will receive a request object, which has an xhr property, and api-behavior assumes you'll be receiving JSON from the server.
