@@ -125,8 +125,8 @@ attached: function() {
   });
   
   this.$.myApi.setHeadersForNextCall({Authorization: "JSONWebToken--lajjfkljdLKSFIf28283rji93..."});
-  this.$.myApi.getRealData().then(function(res){
-    console.log(res);
+  this.$.myApi.getRealData().then(function(req){
+    console.log(req.xhr.response);
   }, {
     param1: "aValue1",
     param2: "aValue2"
