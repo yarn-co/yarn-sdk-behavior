@@ -103,7 +103,7 @@ The callback will receive a request object, which has an xhr property, and api-b
 If you want the response to be a different type, then put the response type in a 'handleAs' property for that
 endpoint.
 
-### Support for Promises!
+## Support for Promises!
 You can optionally receive a promise returned from your api function, use it like this:
 ```javascript
 // For a post
@@ -114,7 +114,7 @@ myApiElement.myEndpointName(body).then(function(request){
 
 
 
-### More examples:
+## More examples:
 ```javascript
 attached: function() {
   this.$.myApi.postSomething({
