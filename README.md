@@ -111,7 +111,7 @@ attached: function() {
     console.log(res);
   });
   
-  this.$.myApi.setHeadersForNextCall({Authorization: "JSONWebToken--lajjfkljdLKASJDFUHFIf28283rji93jfj32dJI2EFSDFJK13"})
+  this.$.myApi.setHeadersForNextCall({Authorization: "JSONWebToken--lajjfkljdLKASJUHFIf28283rji93..."});
   this.$.myApi.getRealData(function(res){
     console.log(res);
   }, {
