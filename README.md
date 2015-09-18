@@ -6,23 +6,9 @@ install with `bower install yarn-api-behavior`
 **Here's what you need to know:**
 
 1 ) This behavior is intended to be used to create a Polymer element for each API you plan on interfacing with.
-2 ) Create an element, name it \<my-api\>. You need to include yarn-endpoints-behavior in your element as well, (downloadable by bower), so your api element's behaviors array should look like this: 
-
+2 ) Create an element, name it \<my-api\>.
+3 ) In your api element, you configure endpoints in an "endpoints" property like so:
 ```javascript
-behaviors: [
-  YarnBehaviors.EndpointsBehavior,
-  YarnBehaviors.APIBehavior
-],
-```
-The order in the behaviors array is important.
-
-3 ) Now in your api element, you configure endpoints in an "endpoints" property like so:
-```javascript
-/*
-  Each endpoint is required to have these properties:
-  method,
-  path
-*/
 
 ready: function() {
   this.set('endpoints', {
@@ -36,49 +22,47 @@ ready: function() {
       protocol: 'http',
       host: 'websiteWithRealData.com',
       method: 'GET',
-      path: '/path/to/endpoint',
-      headers: {Authorization: "etWAe2092--ReallyLongJSONWebToken--:JSHDGSJDF34523sjdhj6klaksf244LHGJETHLIJ23l"}
+      path: '/path/to/endpoint'
+    },
+    // httpbin will send back what you post
+    postSomething: {
+      protocol: 'http',
+      host: 'httpbin.org',
+      method: 'POST',
+      path: '/post'
     }
   });
 }
 
 /*
-  Optional parameters for each endpoint are:
-  protocol,
-  host,
-  headers
+  Each endpoint is required to have these properties:
+  method,
+  path
+
+  Optional properties for each endpoint are:
+  protocol,   // default is http
+  host,       // default is localhost:3001
+  handleAs    // default is json
 */
 
 /*
   There are properties api-behavior gives you that lets
   you set defaults for the host or protocol options.
   These values will be used in an endpoint when none
-  are explicitly configured.
+  are explicitly configured:
   
-  (http still acts as the default protocol even if you don't set this.defaultProtocol.)
-  
-  Example:
-  ready: function() {
-    ...
-    this.defaultProtocol = 'http';
-    this.defaultHost = 'localhost:3001';
-  }
+  defaultProtocol,
+  defaultHost
 */
 ```
 ---
 
-4 ) There's one thing left to do in your \<my-api\> element, that's bring in an iron-ajax element for api-behavior to latch onto. Here's what your api element's template should look like:
-```
-<template>
-  <iron-ajax id='ajax'></iron-ajax>
-</template>
-```
+That's it for configuration!
 
-
-
-And the rest is magic, so let's enjoy it!
+4 ) For each endpoint configured, api-behavior generates a function on your api element with the same name you gave the respective endpoint.
 
 Here's how to make a call to an endpoint:
+
 In another element, you'll want to import your \<my-api\> element and stick it in the template. Give it an id, say, "myApi".
 
 Now make calls to your endpoints like this:
@@ -91,29 +75,37 @@ attached: function() {
 }
 ```
 
-5 ) Let's talk about this for a second: for each endpoint you configured, api-behavior gave your element a function with the same name as you gave your endpoint. The way you call them differs depending on how you configured your endpoint.
-
 If your endpoint method was GET, then the function will have these arguments--
 ```javascript
 myApiElement.myEndpointName(callback[,parametersObject]);
-// callback required, parameters optional
+// 'callback' is required, 'parameters' is optional
 ```
 If your endpoint method was POST, PUT, or DELETE, the function will have these arguments--
 ```javascript
-myApiElement.myEndpointName(bodyObject,callback[,parametersObject]);
-// body, callback required, parameters optional
+myApiElement.myEndpointName(body,callback[,parametersObject]);
+// 'body', 'callback' are required, 'parameters' is optional
 ```
 
 The callback will receive a response object and api-behavior assumes you'll be receiving JSON from the server.
+If you want the response to be a different type, then put the response type in a 'handleAs' property for that
+endpoint.
 
-Another example:
+More examples:
 ```javascript
 attached: function() {
-  this.$.myApi.getRealData(function(response){
-    console.log(response);
+  this.$.myApi.postSomething(
+  {
+    aKey: "aValue"
+  },
+  function(res) {
+    console.log(res);
+  });
+  
+  this.$.myApi.getRealData(function(res){
+    console.log(res);
   }, {
-    param1: "thisIsAValue",
-    param2: "o3rjhg93jth894hjtg924jg3589hjgi8jgiu349jg9348hgj894ghfj928gh876g4f6823dg7523fxrwcx64wxfd26vghr3bj4t9kn50ml680ko807jk596jgu34hfy2gc72eghfu3nt49hj358ghu24bfu32gc612vfdt12fdg713hf248hvu34hv82jiw1jd8123hf"
+    param1: "aValue1",
+    param2: "aValue2"
   });
 }
 ```
