@@ -117,8 +117,7 @@ myApiElement.myEndpointName(body).then(function(request){
 ### More examples:
 ```javascript
 attached: function() {
-  this.$.myApi.postSomething(
-  {
+  this.$.myApi.postSomething({
     aKey: "aValue"
   },
   function(res) {
