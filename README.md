@@ -62,9 +62,9 @@ ready: function() {
 ---
 
 
-4 ) For each endpoint configured, api-behavior generates a function on your api element with the same name you gave the respective endpoint.
-
 ## Making calls to endpoints
+
+For each endpoint configured, api-behavior generates a function on your api element with the same name you gave the respective endpoint.
 
 In another element, you'll want to import your \<my-api\> element and stick it in the template. Give it an id, say, "myApi".
 
