@@ -145,7 +145,7 @@ APIBehaviorImpl = {
             if(typeof cb == 'function') {
               
               self.ajax.generateRequest().completes.then(function(request) {
-                cb(request.xhr.response);
+                cb(request);
               })
               .catch(function(reason) {
                 cb(reason);
@@ -205,7 +205,7 @@ APIBehaviorImpl = {
             if(typeof cb == 'function') {
               
               self.ajax.generateRequest().completes.then(function(request) {
-                cb(request.xhr.response);
+                cb(request);
               })
               .catch(function(reason) {
                 cb(reason);
