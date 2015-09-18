@@ -3,15 +3,13 @@ APIBehavior makes it super easy to interface with APIs in Polymer!
 
 install with `bower install yarn-api-behavior`
 
-**Here's what you need to know:**
+This behavior is intended to be used to create a Polymer element to interface with an API you want to use in your project.
 
-1 ) This behavior is intended to be used to create a Polymer element for each API you plan on interfacing with.
-
-2 ) Create an element, name it \<my-api\>.
-
-3 ) In your api element, you configure endpoints in an "endpoints" property like so:
 
 ## Configuring Endpoints
+* Create an element, name it something like \<my-api\>.
+
+* In your api element, you configure endpoints in an "endpoints" property like so:
 ```javascript
 
 ready: function() {
@@ -64,11 +62,11 @@ ready: function() {
 
 ## Making calls to endpoints
 
-For each endpoint configured, api-behavior generates a function on your api element with the same name you gave the respective endpoint.
+* For each endpoint configured, api-behavior generates a function on your api element with the same name you gave the respective endpoint.
 
-In another element, you'll want to import your \<my-api\> element and stick it in the template. Give it an id, say, "myApi".
+* In another element, you'll want to import your \<my-api\> element and stick it in the template. Give it an id, say, "myApi".
 
-Now make calls to your endpoints like this:
+* Now make calls to your endpoints like this:
 
 ```javascript
 attached: function() {
