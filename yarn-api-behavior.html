@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../yarn-endpoints-behavior/yarn-endpoints-behavior.html">
+<link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 
 <script>
@@ -55,7 +56,6 @@ APIBehaviorImpl = {
   created: function() {
     
     this.ajax = document.createElement("iron-ajax");
-    console.log(this.ajax);
     this.ajax.set('handleAs', this._defaultHandleAs);
     this.addEventListener('url-changed', this._onUrlChange);
   },
@@ -104,7 +104,13 @@ APIBehaviorImpl = {
       switch(method) {
         case 'GET':
           // Creating a function on the element that matches the endpoint's name
-          self[endpoint] = function(cb, params) {
+          self[endpoint] = function(params, cb) {
+            
+            if(typeof params === 'function') {
+              
+              cb = params;
+              params = null;
+            }
             
             self.set('_body', null);
             self.set('_method', self.endpoints[endpoint].method);
@@ -137,13 +143,16 @@ APIBehaviorImpl = {
             self.set('endpoint', endpoint);
             
             if(typeof cb == 'function') {
+              
               self.ajax.generateRequest().completes.then(function(request) {
                 cb(request.xhr.response);
               })
               .catch(function(reason) {
                 cb(reason);
               });
+              
             } else {
+              
               return self.ajax.generateRequest().completes;
             }
           }
@@ -152,11 +161,17 @@ APIBehaviorImpl = {
         case 'PUT':
         case 'DELETE':
           // Creating a function on the element that matches the endpoint's name
-          self[endpoint] = function(body, cb, params) {
+          self[endpoint] = function(body, params, cb) {
             
             if(typeof body == 'function') {
               throw new Error('Your endpoint: "' + endpoint + '" needs a body!');
             }
+            
+            if(typeof params === 'function') {
+              cb = params;
+              params = null;
+            }
+            
             self.set('_body', body);
             self.set('_method', self.endpoints[endpoint].method);
             if(params) {
@@ -186,7 +201,9 @@ APIBehaviorImpl = {
             }
             
             self.set('endpoint', endpoint);
+            
             if(typeof cb == 'function') {
+              
               self.ajax.generateRequest().completes.then(function(request) {
                 cb(request.xhr.response);
               })
@@ -194,6 +211,7 @@ APIBehaviorImpl = {
                 cb(reason);
               });
             } else {
+              
               return self.ajax.generateRequest().completes;
             }
           }
@@ -207,11 +225,31 @@ APIBehaviorImpl = {
       // Simulate latency if this.simLatency && host contains 'localhost'
       // monkeypatch
       if(self.simLatency && self.host.indexOf("localhost") !== -1) {
+        
         var currentFunc = self[endpoint];
-        self[endpoint] = function(cb, params) {
-          setTimeout(function() {
-            currentFunc(cb, params);
-          }, 300);
+        
+        // The length of a function is the number of expected arguments
+        if(currentFunc.length === 2) {
+          
+          self[endpoint] = function(params, cb) {
+            
+            return new Promise(function(resolve, reject) {
+              self.async(function() {
+                resolve(currentFunc(params, cb));
+              }, 300)
+            });
+            
+          }
+        } else if(currentFunc.length === 3) {
+          
+          self[endpoint] = function(body, params, cb) {
+            
+            return new Promise(function(resolve, reject) {
+              self.async(function() {
+                resolve(currentFunc(body, params, cb));
+              }, 300)
+            });
+          }
         }
       }
     });

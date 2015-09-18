@@ -1,6 +1,6 @@
 {
   "name": "yarn-api-behavior",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "keywords": [
     "web-components",
     "polymer",
@@ -21,6 +21,7 @@
   "dependencies": {
     "iron-ajax": "PolymerElements/iron-ajax#~1.0.4",
     "polymer": "Polymer/polymer#^1.0.0",
+    "promise-polyfill": "~1.0.0",
     "yarn-endpoints-behavior": "~0.1.2"
   },
   "devDependencies": {
