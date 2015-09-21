@@ -31,6 +31,9 @@ APIBehaviorImpl = {
       type: Boolean,
       value: true
     },
+    apiResponseHook: {
+      type: Function
+    },
     _body: {
       type: Object,
       observer: '_onBodyChange'
@@ -142,18 +145,33 @@ APIBehaviorImpl = {
             
             self.set('endpoint', endpoint);
             
+            var apiResponseHook = self.apiResponseHook;
+            
             if(typeof cb == 'function') {
               
               self.ajax.generateRequest().completes.then(function(request) {
+                
+                if(apiResponseHook) {
+                  apiResponseHook(request);
+                }
                 cb(request);
               })
               .catch(function(reason) {
+                if(apiResponseHook) {
+                  apiResponseHook(request);
+                }
                 cb(reason);
               });
               
             } else {
-              
-              return self.ajax.generateRequest().completes;
+              return new Promise(function(resolve, reject) {
+                self.ajax.generateRequest().completes.then(function(request) {
+                  if(apiResponseHook) {
+                    apiResponseHook(request);
+                  }
+                  resolve(request);
+                })
+              });
             }
           }
           break;
@@ -202,17 +220,33 @@ APIBehaviorImpl = {
             
             self.set('endpoint', endpoint);
             
+            var apiResponseHook = self.apiResponseHook;
+            
             if(typeof cb == 'function') {
               
               self.ajax.generateRequest().completes.then(function(request) {
+                
+                if(apiResponseHook) {
+                  apiResponseHook(request);
+                }
                 cb(request);
               })
               .catch(function(reason) {
+                if(apiResponseHook) {
+                  apiResponseHook(request);
+                }
                 cb(reason);
               });
-            } else {
               
-              return self.ajax.generateRequest().completes;
+            } else {
+              return new Promise(function(resolve, reject) {
+                self.ajax.generateRequest().completes.then(function(request) {
+                  if(apiResponseHook) {
+                    apiResponseHook(request);
+                  }
+                  resolve(request);
+                })
+              });
             }
           }
           break;
