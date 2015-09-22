@@ -21,7 +21,6 @@ ready: function() {
       path: '/get/some/local/json/file.json'
     },
     getRealData: {
-      protocol: 'http',
       host: 'websiteWithRealData.com',
       method: 'GET',
       path: '/path/to/endpoint'
@@ -60,8 +59,7 @@ ready: function() {
 ---
 
 ## Headers
-If you want to set headers for your endpoints, you'll have to write a function in your api element that sets the 'headers' property that api-behavior exposes. api-behavior resets the headers to {} after each endpoint call
-right now but maybe that's not the best idea I'm not sure. So call this function right before calling your endpoint, it'll set the headers, then make your call with those headers.
+If you want to set headers for your endpoints, you'll have to write a function in your api element that sets the 'headers' property that api-behavior exposes. Call this function right before calling your endpoint, it'll set the headers, then make your call with those headers. Right now you'll have to set the headers before each call you make to ensure the headers aren't the ones intended for the most recent call you made, whether you want them to have something or be set to default {}
 Example:
 ```javascript
 setHeadersForNextCall: function(headersObj) {
@@ -79,44 +77,58 @@ setHeadersForNextCall: function(headersObj) {
 
 ```javascript
 attached: function() {
-  this.$.myApi.getFakeData(function(response){
-    console.log(response);
+  this.$.myApi.getFakeData(function(request){
+    console.log(request.xhr.response);
   });
 }
 ```
 
-If your endpoint method was GET, then the function will have these arguments--
+If your endpoint method was GET, then the function can have these arguments--
 ```javascript
-myApiElement.myEndpointName(callback[,parametersObject]);
-// 'callback' is required, 'parameters' is optional
+// We support function overloading
+myApiElement.myEndpointName(parameters, callback);
+myApiElement.myEndpointName(callback);
 ```
 If your endpoint method was POST, PUT, or DELETE, the function will have these arguments--
 ```javascript
-myApiElement.myEndpointName(body,callback[,parametersObject]);
-// 'body', 'callback' are required, 'parameters' is optional
+// Function overloading
+myApiElement.myEndpointName(body, parameters, callback);
+myApiElement.myEndpointName(body, callback);
 ```
 
-The callback will receive a response object and api-behavior assumes you'll be receiving JSON from the server.
+The callback will receive a request object, which has an xhr property, and api-behavior assumes you'll be receiving JSON from the server.
 If you want the response to be a different type, then put the response type in a 'handleAs' property for that
 endpoint.
 
-More examples:
+## Support for Promises!
+You can optionally receive a promise returned from your api function, use it like this:
+```javascript
+// For a post
+myApiElement.myEndpointName(body).then(function(request){
+  console.log(request.xhr.response);
+})
+```
+
+
+
+## More examples:
 ```javascript
 attached: function() {
-  this.$.myApi.postSomething(
-  {
+
+  this.$.myApi.setHeaders({Authorization: "JSONWebToken--lajjfkljdLKSFIf28283rji93..."});
+  this.$.myApi.getRealData({
+    urlParam1: "aValue1",
+    urlParam2: "aValue2"
+  }).then(function(req){
+    console.log(req.xhr.response);
+  });
+  
+  this.$.myApi.setHeaders({});
+  this.$.myApi.postSomething({
     aKey: "aValue"
   },
   function(res) {
     console.log(res);
-  });
-  
-  this.$.myApi.setHeadersForNextCall({Authorization: "JSONWebToken--lajjfkljdLKSFIf28283rji93..."});
-  this.$.myApi.getRealData(function(res){
-    console.log(res);
-  }, {
-    param1: "aValue1",
-    param2: "aValue2"
   });
 }
 ```
