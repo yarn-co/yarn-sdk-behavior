@@ -151,6 +151,10 @@ APIBehaviorImpl = {
               
               self.ajax.generateRequest().completes.then(function(request) {
                 
+                if(request.xhr.status != 200) {
+                  self.fire('api-error', {api: self, request:request});
+                }
+                
                 if(apiResponseHook) {
                   apiResponseHook(request);
                 }
@@ -225,6 +229,10 @@ APIBehaviorImpl = {
             if(typeof cb == 'function') {
               
               self.ajax.generateRequest().completes.then(function(request) {
+                
+                if(request.xhr.status != 200) {
+                  self.fire('api-error', {api: self, request:request});
+                }
                 
                 if(apiResponseHook) {
                   apiResponseHook(request);
