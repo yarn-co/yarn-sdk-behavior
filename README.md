@@ -109,9 +109,17 @@ myApiElement.myEndpointName(body).then(function(request){
 })
 ```
 
+## Error handling
+If an ajax call returns and its status does != 200, an 'api-error' event will be fired.
+Inside e.detail, there's an object that has these properties:
+```javascript
+{
+  api: //the api element this behavior belongs to,
+  response: //the response
+}
+```
 
-
-## More examples:
+## More examples
 ```javascript
 attached: function() {
 
