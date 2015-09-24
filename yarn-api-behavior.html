@@ -136,17 +136,17 @@ APIBehaviorImpl = {
           // Creating a function on the element that matches the endpoint's name
           self[endpoint] = function(body, params, cb) {
             
-            if(typeof body == 'function' || typeof body != 'object') {
+            if(typeof body != 'object') {
               throw new Error('Your call for "' + endpoint + '" needs a body, and it needs to be an object!');
-            }
-            
-            if(self.apiPreRequestHook) {
-              self.apiPreRequestHook(body, params, cb);
             }
             
             if(typeof params === 'function') {
               cb = params;
               params = null;
+            }
+            
+            if(self.apiPreRequestHook) {
+              self.apiPreRequestHook(body, params, cb);
             }
             
             self.set('_body', body);
