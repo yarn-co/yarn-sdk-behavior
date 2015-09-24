@@ -58,6 +58,26 @@ ready: function() {
 ```
 ---
 
+##Hook methods
+There are two hook methods for ajax requests. One before the call, and one after it returns.
+You can set these to functions in your api element like so:
+```javascript
+
+
+ready: function() {
+  this.set('apiPreRequestHook', function() {
+    // Do things you want done before each call.
+  });
+  
+  this.set('apiResponseHook', function(req) {
+    console.log("req", req);
+    // Do things you want done after each call.
+    // This gets called before the callback you define.
+    // I think you can mutate the req object before the callback gets it, haven't tried it yet though.
+  });
+}
+```
+
 ## Headers
 If you want to set headers for your endpoints, you'll have to write a function in your api element that sets the 'headers' property that api-behavior exposes. Call this function right before calling your endpoint, it'll set the headers, then make your call with those headers. Right now you'll have to set the headers before each call you make to ensure the headers aren't the ones intended for the most recent call you made, whether you want them to have something or be set to default {}
 Example:
