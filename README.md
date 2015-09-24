@@ -25,7 +25,7 @@ ready: function() {
       method: 'GET',
       path: '/path/to/endpoint'
     },
-    // httpbin will send back what you post
+    // httpbin will send back what you post, you can test APIBehavior with that endpoint
     postSomething: {
       protocol: 'http',
       host: 'httpbin.org',
