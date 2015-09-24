@@ -31,6 +31,9 @@ APIBehaviorImpl = {
       type: Boolean,
       value: true
     },
+    apiPreRequestHook: {
+      type: Function
+    },
     apiResponseHook: {
       type: Function
     },
@@ -108,6 +111,10 @@ APIBehaviorImpl = {
         case 'GET':
           // Creating a function on the element that matches the endpoint's name
           self[endpoint] = function(params, cb) {
+            
+            if(apiPreRequestHook) {
+              apiPreRequestHook();
+            }
             
             if(typeof params === 'function') {
               
@@ -187,6 +194,10 @@ APIBehaviorImpl = {
             
             if(typeof body == 'function') {
               throw new Error('Your endpoint: "' + endpoint + '" needs a body!');
+            }
+            
+            if(apiPreRequestHook) {
+              apiPreRequestHook(params, cb);
             }
             
             if(typeof params === 'function') {
