@@ -31,12 +31,6 @@ APIBehaviorImpl = {
       type: Boolean,
       value: true
     },
-    apiPreRequestHook: {
-      type: Function
-    },
-    apiResponseHook: {
-      type: Function
-    },
     _body: {
       type: Object,
       observer: '_onBodyChange'
@@ -113,7 +107,7 @@ APIBehaviorImpl = {
           self[endpoint] = function(params, cb) {
             
             if(self.apiPreRequestHook) {
-              self.apiPreRequestHook();
+              self.apiPreRequestHook(null, params, cb);
             }
             
             if(typeof params === 'function') {
@@ -123,67 +117,17 @@ APIBehaviorImpl = {
             }
             
             self.set('_body', null);
-            self.set('_method', self.endpoints[endpoint].method);
+            
             if(params) {
               self.set('_params', params);
             } else {
               self.set('_params', {});
             }
-            if(self.endpoints[endpoint].host) {
-              self.set('host', self.endpoints[endpoint].host);
-            } else {
-              self.set('host', self.defaultHost);
-            }
-            if(self.endpoints[endpoint].headers) {
-              self.set('headers', self.endpoints[endpoint].headers);
-            } else {
-              self.set('headers', {});
-            }
-            if(self.endpoints[endpoint].protocol) {
-              self.set('protocol', self.endpoints[endpoint].protocol);
-            } else {
-              self.set('protocol', self.defaultProtocol);
-            }
-            if(self.endpoints[endpoint].handleAs) {
-              self.set('_handleAs', self.endpoints[endpoint].handleAs);
-            } else {
-              self.set('_handleAs', self._defaultHandleAs);
-            }
             
-            self.set('endpoint', endpoint);
+            setEndpointVars(endpoint);
             
-            var apiResponseHook = self.apiResponseHook;
+            return generateAndHandleRequest(cb);
             
-            if(typeof cb == 'function') {
-              
-              self.ajax.generateRequest().completes.then(function(request) {
-                
-                if(request.xhr.status != 200) {
-                  self.fire('api-error', {api: self, request:request});
-                }
-                
-                if(apiResponseHook) {
-                  apiResponseHook(request);
-                }
-                cb(request);
-              })
-              .catch(function(reason) {
-                if(apiResponseHook) {
-                  apiResponseHook(request);
-                }
-                cb(reason);
-              });
-              
-            } else {
-              return new Promise(function(resolve, reject) {
-                self.ajax.generateRequest().completes.then(function(request) {
-                  if(apiResponseHook) {
-                    apiResponseHook(request);
-                  }
-                  resolve(request);
-                })
-              });
-            }
           }
           break;
         case 'POST':
@@ -192,12 +136,12 @@ APIBehaviorImpl = {
           // Creating a function on the element that matches the endpoint's name
           self[endpoint] = function(body, params, cb) {
             
-            if(typeof body == 'function') {
-              throw new Error('Your endpoint: "' + endpoint + '" needs a body!');
+            if(typeof body == 'function' || typeof body != 'object') {
+              throw new Error('Your call for "' + endpoint + '" needs a body, and it needs to be an object!');
             }
             
             if(self.apiPreRequestHook) {
-              self.apiPreRequestHook(params, cb);
+              self.apiPreRequestHook(body, params, cb);
             }
             
             if(typeof params === 'function') {
@@ -206,69 +150,126 @@ APIBehaviorImpl = {
             }
             
             self.set('_body', body);
-            self.set('_method', self.endpoints[endpoint].method);
+            
             if(params) {
               self.set('_params', params);
             } else {
               self.set('_params', {});
             }
-            if(self.endpoints[endpoint].host) {
-              self.set('host', self.endpoints[endpoint].host);
-            } else {
-              self.set('host', self.defaultHost);
-            }
-            if(self.endpoints[endpoint].headers) {
-              self.set('headers', self.endpoints[endpoint].headers);
-            } else {
-              self.set('headers', {});
-            }
-            if(self.endpoints[endpoint].protocol) {
-              self.set('protocol', self.endpoints[endpoint].protocol);
-            } else {
-              self.set('protocol', self.defaultProtocol);
-            }
-            if(self.endpoints[endpoint].handleAs) {
-              self.set('_handleAs', self.endpoints[endpoint].handleAs);
-            } else {
-              self.set('_handleAs', self._defaultHandleAs);
-            }
             
-            self.set('endpoint', endpoint);
+            setEndpointVars(endpoint);
             
-            var apiResponseHook = self.apiResponseHook;
+            return generateAndHandleRequest(cb);
             
-            if(typeof cb == 'function') {
-              
-              self.ajax.generateRequest().completes.then(function(request) {
-                
-                if(request.xhr.status != 200) {
-                  self.fire('api-error', {api: self, request:request});
-                }
-                
-                if(apiResponseHook) {
-                  apiResponseHook(request);
-                }
-                cb(request);
-              })
-              .catch(function(reason) {
-                if(apiResponseHook) {
-                  apiResponseHook(request);
-                }
-                cb(reason);
-              });
-              
-            } else {
-              return new Promise(function(resolve, reject) {
-                self.ajax.generateRequest().completes.then(function(request) {
-                  if(apiResponseHook) {
-                    apiResponseHook(request);
-                  }
-                  resolve(request);
-                })
-              });
-            }
           }
           break;
+      }
+      
+      function setEndpointVars(endpoint) {
+        
+        self.set('_method', self.endpoints[endpoint].method);
+        if(self.endpoints[endpoint].host) {
+          self.set('host', self.endpoints[endpoint].host);
+        } else {
+          self.set('host', self.defaultHost);
+        }
+        if(self.endpoints[endpoint].headers) {
+          self.set('headers', self.endpoints[endpoint].headers);
+        } else {
+          self.set('headers', {});
+        }
+        if(self.endpoints[endpoint].protocol) {
+          self.set('protocol', self.endpoints[endpoint].protocol);
+        } else {
+          self.set('protocol', self.defaultProtocol);
+        }
+        if(self.endpoints[endpoint].handleAs) {
+          self.set('_handleAs', self.endpoints[endpoint].handleAs);
+        } else {
+          self.set('_handleAs', self._defaultHandleAs);
+        }
+        
+        self.set('endpoint', endpoint);
+      }
+      
+      function generateAndHandleRequest(cb) {
+        var apiResponseHook = self.apiResponseHook;
+        
+        if(typeof cb == 'function') {
+          
+          self.ajax.generateRequest().completes.then(function(request) {
+            
+            if(request.xhr.status >= 400 && request.xhr.status < 600) {
+              self.fire('api-error', {api: self, request:request});
+            }
+            
+            if(apiResponseHook) {
+              apiResponseHook(null, request, cb, function() {
+                cb(null, request);
+              });
+            } else {
+              cb(null, request);
+            }
+            
+          })
+          .catch(function(reason) {
+            
+            if(apiResponseHook) {
+              apiResponseHook(reason, null, cb, function() {
+                cb(reason, null);
+              });
+            } else {
+              cb(reason, null);
+            }
+          });
+          
+        } else {
+          
+          var promiseResolve;
+          var promiseReject;
+          var ajaxRequest;
+          
+          return new Promise(function(resolve, reject) {
+            
+            promiseResolve = resolve;
+            promiseReject = reject;
+            
+            self.ajax.generateRequest().completes.then(function(request) {
+              if(request.xhr.status >= 400 && request.xhr.status < 600) {
+                self.fire('api-error', {api: self, request:request});
+              }
+              
+              callResponseHookIfExists(null, request);
+              
+            })
+            .catch(function(reason) {
+              
+              callResponseHookIfExists(reason, null);
+              
+            })
+            
+          })
+          
+          function callResponseHookIfExists(err, request) {
+            if(apiResponseHook) {
+              var promiseResolveReject = {resolve: promiseResolve, reject: promiseReject};
+              apiResponseHook(err, request, promiseResolveReject, function() {
+                if(err) {
+                  promiseReject(err);
+                } else {
+                  promiseResolve(request);
+                }
+              });
+            } else {
+              if(err) {
+                promiseReject(err);
+              } else {
+                promiseResolve(request);
+              }
+            }
+          }
+          
+        }
       }
       
       if(!self.host) {
