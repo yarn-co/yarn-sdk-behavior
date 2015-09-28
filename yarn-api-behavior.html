@@ -57,6 +57,7 @@ APIBehaviorImpl = {
     
     this.ajax = document.createElement("iron-ajax");
     this.ajax.set('handleAs', this._defaultHandleAs);
+    this.ajax.set('contentType', "application/json");
     this.addEventListener('url-changed', this._onUrlChange);
   },
   
