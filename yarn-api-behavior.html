@@ -35,6 +35,11 @@ APIBehaviorImpl = {
       type: Object,
       observer: '_onBodyChange'
     },
+    _withCredentials: {
+      type: Boolean,
+      value: false,
+      observer: '_onWithCredentialsChange'
+    },
     _handleAs: {
       type: String,
       observer: '_onHandleAsChange'
@@ -77,23 +82,27 @@ APIBehaviorImpl = {
     this.ajax.set('url', e.detail.value);
   },
   
-  _onBodyChange: function(newVal, oldVal) {
+  _onBodyChange: function(newVal) {
     this.ajax.set('body', newVal);
   },
   
-  _onHandleAsChange: function(newVal, oldVal) {
+  _onHandleAsChange: function(newVal) {
     this.ajax.set('handleAs', newVal);
   },
   
-  _onMethodChange: function(newVal, oldVal) {
+  _onMethodChange: function(newVal) {
     this.ajax.set('method', newVal);
   },
   
-  _onHeadersChange: function(newVal, oldVal) {
+  _onHeadersChange: function(newVal) {
     this.ajax.set('headers', newVal);
   },
   
-  _onParamsChange: function(newVal, oldVal) {
+  _onWithCredentialsChange: function(newVal) {
+    this.ajax.set('withCredentials', newVal);
+  },
+  
+  _onParamsChange: function(newVal) {
     this.ajax.set('params', newVal);
   },
   
@@ -186,6 +195,11 @@ APIBehaviorImpl = {
           self.set('_handleAs', self.endpoints[endpoint].handleAs);
         } else {
           self.set('_handleAs', self._defaultHandleAs);
+        }
+        if(self.endpoints[endpoint].withCredentials) {
+          self.set('_withCredentials', self.endpoints[endpoint].withCredentials);
+        } else {
+          self.set('_withCredentials', false);
         }
         
         self.set('endpoint', endpoint);
