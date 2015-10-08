@@ -176,8 +176,6 @@ APIBehaviorImpl = {
         }
         if(self.endpoints[endpoint].headers) {
           self.set('headers', self.endpoints[endpoint].headers);
-        } else {
-          self.set('headers', {});
         }
         if(self.endpoints[endpoint].protocol) {
           self.set('protocol', self.endpoints[endpoint].protocol);
@@ -271,6 +269,9 @@ APIBehaviorImpl = {
           }
           
         }
+        
+        self.set('headers', {});
+        
       }
       
       if(!self.host) {
