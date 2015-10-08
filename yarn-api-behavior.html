@@ -198,6 +198,12 @@ APIBehaviorImpl = {
         }
         if(self.endpoints[endpoint].withCredentials) {
           self.set('_withCredentials', self.endpoints[endpoint].withCredentials);
+          var tmp = {};
+          if(self.headers) {
+            tmp = self.headers;
+          }
+          tmp['Access-Control-Allow-Credentials'] = true;
+          self.set('headers', tmp);
         } else {
           self.set('_withCredentials', false);
         }
