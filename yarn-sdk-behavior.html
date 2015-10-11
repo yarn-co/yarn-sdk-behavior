@@ -8,7 +8,7 @@ var YarnBehaviors = YarnBehaviors || {};
 
 (function() {
 
-APIBehaviorImpl = {
+SDKBehaviorImpl = {
   
   properties: {
     endpoints: {
@@ -67,7 +67,7 @@ APIBehaviorImpl = {
   },
   
   _onEndpointsChange: function() {
-    this._makeApi();
+    this._makeSdk();
   },
   
   _onProtocolChange: function(newVal, oldVal) {
@@ -106,7 +106,7 @@ APIBehaviorImpl = {
     this.ajax.set('params', newVal);
   },
   
-  _makeApi: function() {
+  _makeSdk: function() {
     var self = this;
     Object.keys(this.endpoints).forEach(function(endpoint) {
       var method = self.endpoints[endpoint].method;
@@ -116,8 +116,8 @@ APIBehaviorImpl = {
           // Creating a function on the element that matches the endpoint's name
           self[endpoint] = function(params, cb) {
             
-            if(self.apiPreRequestHook) {
-              self.apiPreRequestHook(null, params, cb);
+            if(self.endpointPreRequestHook) {
+              self.endpointPreRequestHook(null, params, cb);
             }
             
             if(typeof params === 'function') {
@@ -155,8 +155,8 @@ APIBehaviorImpl = {
               params = null;
             }
             
-            if(self.apiPreRequestHook) {
-              self.apiPreRequestHook(body, params, cb);
+            if(self.endpointPreRequestHook) {
+              self.endpointPreRequestHook(body, params, cb);
             }
             
             self.set('_body', body);
@@ -212,18 +212,18 @@ APIBehaviorImpl = {
       }
       
       function generateAndHandleRequest(cb) {
-        var apiResponseHook = self.apiResponseHook;
+        var endpointResponseHook = self.endpointResponseHook;
         
         if(typeof cb == 'function') {
           
           self.ajax.generateRequest().completes.then(function(request) {
             
             if(request.xhr.status >= 400 && request.xhr.status < 600) {
-              self.fire('api-error', {api: self, request:request});
+              self.fire('sdk-error', {sdk: self, request:request});
             }
             
-            if(apiResponseHook) {
-              apiResponseHook(null, request, cb, function() {
+            if(endpointResponseHook) {
+              endpointResponseHook(null, request, cb, function() {
                 cb(null, request);
               });
             } else {
@@ -233,8 +233,8 @@ APIBehaviorImpl = {
           })
           .catch(function(reason) {
             
-            if(apiResponseHook) {
-              apiResponseHook(reason, null, cb, function() {
+            if(endpointResponseHook) {
+              endpointResponseHook(reason, null, cb, function() {
                 cb(reason, null);
               });
             } else {
@@ -255,7 +255,7 @@ APIBehaviorImpl = {
             
             self.ajax.generateRequest().completes.then(function(request) {
               if(request.xhr.status >= 400 && request.xhr.status < 600) {
-                self.fire('api-error', {api: self, request:request});
+                self.fire('sdk-error', {sdk: self, request:request});
               }
               
               callResponseHookIfExists(null, request);
@@ -270,9 +270,9 @@ APIBehaviorImpl = {
           })
           
           function callResponseHookIfExists(err, request) {
-            if(apiResponseHook) {
+            if(endpointResponseHook) {
               var promiseResolveReject = {resolve: promiseResolve, reject: promiseReject};
-              apiResponseHook(err, request, promiseResolveReject, function() {
+              endpointResponseHook(err, request, promiseResolveReject, function() {
                 if(err) {
                   promiseReject(err);
                 } else {
@@ -332,7 +332,7 @@ APIBehaviorImpl = {
   }
 };
 
-YarnBehaviors.APIBehavior = [YarnBehaviors.EndpointsBehavior, APIBehaviorImpl];
+YarnBehaviors.SDKBehavior = [YarnBehaviors.EndpointsBehavior, SDKBehaviorImpl];
 
 })()
 </script>
