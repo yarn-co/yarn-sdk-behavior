@@ -8,7 +8,7 @@ var YarnBehaviors = YarnBehaviors || {};
 
 (function() {
 
-SDKBehaviorImpl = {
+var SDKBehaviorImpl = {
   
   properties: {
     endpoints: {
@@ -51,10 +51,6 @@ SDKBehaviorImpl = {
     _method: {
       type: String,
       observer: '_onMethodChange'
-    },
-    _params: {
-      type: Object,
-      observer: '_onParamsChange'
     }
   },
   
@@ -102,10 +98,6 @@ SDKBehaviorImpl = {
     this.ajax.set('withCredentials', newVal);
   },
   
-  _onParamsChange: function(newVal) {
-    this.ajax.set('params', newVal);
-  },
-  
   _makeSdk: function() {
     var self = this;
     Object.keys(this.endpoints).forEach(function(endpoint) {
@@ -116,8 +108,8 @@ SDKBehaviorImpl = {
           // Creating a function on the element that matches the endpoint's name
           self[endpoint] = function(params, cb) {
             
-            if(self.endpointPreRequestHook) {
-              self.endpointPreRequestHook(null, params, cb);
+            if(self.sdkPreRequestHook) {
+              self.sdkPreRequestHook(null, params, cb);
             }
             
             if(typeof params === 'function') {
@@ -129,9 +121,9 @@ SDKBehaviorImpl = {
             self.set('_body', null);
             
             if(params) {
-              self.set('_params', params);
+              self.set('params', params);
             } else {
-              self.set('_params', {});
+              self.set('params', {});
             }
             
             setEndpointVars(endpoint);
@@ -155,16 +147,16 @@ SDKBehaviorImpl = {
               params = null;
             }
             
-            if(self.endpointPreRequestHook) {
-              self.endpointPreRequestHook(body, params, cb);
+            if(self.sdkPreRequestHook) {
+              self.sdkPreRequestHook(body, params, cb);
             }
             
             self.set('_body', body);
             
             if(params) {
-              self.set('_params', params);
+              self.set('params', params);
             } else {
-              self.set('_params', {});
+              self.set('params', {});
             }
             
             setEndpointVars(endpoint);
@@ -212,7 +204,7 @@ SDKBehaviorImpl = {
       }
       
       function generateAndHandleRequest(cb) {
-        var endpointResponseHook = self.endpointResponseHook;
+        var sdkResponseHook = self.sdkResponseHook;
         
         if(typeof cb == 'function') {
           
@@ -222,8 +214,8 @@ SDKBehaviorImpl = {
               self.fire('sdk-error', {sdk: self, request:request});
             }
             
-            if(endpointResponseHook) {
-              endpointResponseHook(null, request, cb, function() {
+            if(sdkResponseHook) {
+              sdkResponseHook(null, request, cb, function() {
                 cb(null, request);
               });
             } else {
@@ -233,8 +225,8 @@ SDKBehaviorImpl = {
           })
           .catch(function(reason) {
             
-            if(endpointResponseHook) {
-              endpointResponseHook(reason, null, cb, function() {
+            if(sdkResponseHook) {
+              sdkResponseHook(reason, null, cb, function() {
                 cb(reason, null);
               });
             } else {
@@ -270,9 +262,9 @@ SDKBehaviorImpl = {
           })
           
           function callResponseHookIfExists(err, request) {
-            if(endpointResponseHook) {
+            if(sdkResponseHook) {
               var promiseResolveReject = {resolve: promiseResolve, reject: promiseReject};
-              endpointResponseHook(err, request, promiseResolveReject, function() {
+              sdkResponseHook(err, request, promiseResolveReject, function() {
                 if(err) {
                   promiseReject(err);
                 } else {
