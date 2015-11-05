@@ -210,10 +210,6 @@ var SDKBehaviorImpl = {
           
           self.ajax.generateRequest().completes.then(function(request) {
             
-            if(request.xhr.status >= 400 && request.xhr.status < 600) {
-              self.fire('sdk-error', {sdk: self, request:request});
-            }
-            
             if(sdkResponseHook) {
               sdkResponseHook(null, request, cb, function() {
                 cb(null, request);
@@ -224,6 +220,12 @@ var SDKBehaviorImpl = {
             
           })
           .catch(function(reason) {
+            
+            var status = String(reason).substr(-3);
+            
+            if((status == 400 || status >= 402) && status < 600) {
+              self.fire('sdk-error', {sdk: self, reason:reason});
+            }
             
             if(sdkResponseHook) {
               sdkResponseHook(reason, null, cb, function() {
