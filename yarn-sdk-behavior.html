@@ -238,6 +238,9 @@ var SDKBehaviorImpl = {
           
         } else {
           
+          var promiseResolve;
+          var promiseReject;
+          var ajaxRequest;
           
           function callResponseHookIfExists(err, request) {
             if(sdkResponseHook) {
@@ -258,17 +261,14 @@ var SDKBehaviorImpl = {
             }
           }
           
-          
-          var promiseResolve;
-          var promiseReject;
-          var ajaxRequest;
-          
           return new Promise(function(resolve, reject) {
             
             promiseResolve = resolve;
             promiseReject = reject;
             
-            self.ajax.generateRequest().completes.then(function(request) {
+            var request = self.ajax.generateRequest();
+            
+            request.completes.then(function(request) {
               if(request.xhr.status >= 400 && request.xhr.status < 600) {
                 self.fire('sdk-error', {sdk: self, request:request});
               }
@@ -278,7 +278,7 @@ var SDKBehaviorImpl = {
             })
             .catch(function(reason) {
               
-              callResponseHookIfExists(reason, null);
+              callResponseHookIfExists({req: request, error:reason}, null);
               
             })
             
