@@ -238,6 +238,27 @@ var SDKBehaviorImpl = {
           
         } else {
           
+          
+          function callResponseHookIfExists(err, request) {
+            if(sdkResponseHook) {
+              var promiseResolveReject = {resolve: promiseResolve, reject: promiseReject};
+              sdkResponseHook(err, request, promiseResolveReject, function() {
+                if(err) {
+                  promiseReject(err);
+                } else {
+                  promiseResolve(request);
+                }
+              });
+            } else {
+              if(err) {
+                promiseReject(err);
+              } else {
+                promiseResolve(request);
+              }
+            }
+          }
+          
+          
           var promiseResolve;
           var promiseReject;
           var ajaxRequest;
@@ -263,24 +284,7 @@ var SDKBehaviorImpl = {
             
           })
           
-          function callResponseHookIfExists(err, request) {
-            if(sdkResponseHook) {
-              var promiseResolveReject = {resolve: promiseResolve, reject: promiseReject};
-              sdkResponseHook(err, request, promiseResolveReject, function() {
-                if(err) {
-                  promiseReject(err);
-                } else {
-                  promiseResolve(request);
-                }
-              });
-            } else {
-              if(err) {
-                promiseReject(err);
-              } else {
-                promiseResolve(request);
-              }
-            }
-          }
+          
           
         }
         
