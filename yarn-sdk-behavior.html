@@ -190,7 +190,7 @@ var SDKBehaviorImpl = {
               tmp[key] = endpointAuth[key];
             });
             self._setHeaders(tmp);
-          } else if(endpointAuth === true) {
+          } else if(endpointAuth === true || endpointAuth === 'default') {
             var tmp = self.ajax.headers;
             
             Object.keys(self.defaultAuthentication).forEach(function(key) {
