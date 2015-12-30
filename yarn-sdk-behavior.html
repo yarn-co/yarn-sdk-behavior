@@ -17,15 +17,15 @@ var SDKBehaviorImpl = {
     },
     defaultHost: {
       type: String,
-      value: 'localhost:3000'
+      value: ''
     },
     defaultProtocol: {
       type: String,
       value: 'http'
     },
-    headers: {
+    defaultAuthentication: {
       type: Object,
-      observer: '_onHeadersChange'
+      value: {}
     },
     simLatency: {
       type: Boolean,
@@ -90,12 +90,12 @@ var SDKBehaviorImpl = {
     this.ajax.set('method', newVal);
   },
   
-  _onHeadersChange: function(newVal) {
-    this.ajax.set('headers', newVal);
-  },
-  
   _onWithCredentialsChange: function(newVal) {
     this.ajax.set('withCredentials', newVal);
+  },
+  
+  _setHeaders: function(newVal) {
+    this.ajax.set('headers', newVal);
   },
   
   _makeSdk: function() {
@@ -109,7 +109,7 @@ var SDKBehaviorImpl = {
           self[endpoint] = function(params, cb) {
             
             if(self.sdkPreRequestHook) {
-              self.sdkPreRequestHook(null, params, cb);
+              self.sdkPreRequestHook(self.endpoints[endpoint], null, params, cb);
             }
             
             if(typeof params === 'function') {
@@ -138,7 +138,7 @@ var SDKBehaviorImpl = {
           // Creating a function on the element that matches the endpoint's name
           self[endpoint] = function(body, params, cb) {
             
-            if(typeof body != 'object') {
+            if(typeof body !== 'object') {
               throw new Error('Your call for "' + endpoint + '" needs a body, and it needs to be an object!');
             }
             
@@ -148,7 +148,7 @@ var SDKBehaviorImpl = {
             }
             
             if(self.sdkPreRequestHook) {
-              self.sdkPreRequestHook(body, params, cb);
+              self.sdkPreRequestHook(self.endpoints[endpoint], body, params, cb);
             }
             
             self.set('_body', body);
@@ -176,7 +176,29 @@ var SDKBehaviorImpl = {
           self.set('host', self.defaultHost);
         }
         if(self.endpoints[endpoint].headers) {
-          self.set('headers', self.endpoints[endpoint].headers);
+          self._setHeaders(self.endpoints[endpoint].headers);
+        } else {
+          self._setHeaders({});
+        }
+        if(self.endpoints[endpoint].authentication) {
+          
+          var endpointAuth = self.endpoints[endpoint].authentication;
+          
+          if(typeof endpointAuth === 'object') {
+            var tmp = self.ajax.headers;
+            Object.keys(endpointAuth).forEach(function(key) {
+              tmp[key] = endpointAuth[key];
+            });
+            self._setHeaders(tmp);
+          } else if(endpointAuth === true) {
+            var tmp = self.ajax.headers;
+            
+            Object.keys(self.defaultAuthentication).forEach(function(key) {
+              tmp[key] = self.defaultAuthentication[key];
+            });
+            self._setHeaders(tmp);
+          }
+          
         }
         if(self.endpoints[endpoint].protocol) {
           self.set('protocol', self.endpoints[endpoint].protocol);
@@ -287,8 +309,6 @@ var SDKBehaviorImpl = {
           
           
         }
-        
-        self.set('headers', {});
         
       }
       

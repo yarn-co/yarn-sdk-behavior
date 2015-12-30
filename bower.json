@@ -1,6 +1,6 @@
 {
   "name": "yarn-sdk-behavior",
-  "version": "1.2.3",
+  "version": "2.0.0",
   "keywords": [
     "web-components",
     "polymer",
@@ -19,7 +19,7 @@
   },
   "main": "yarn-sdk-behavior.html",
   "dependencies": {
-    "iron-ajax": "PolymerElements/iron-ajax#~1.0.4",
+    "iron-ajax": "PolymerElements/iron-ajax#1.1.1",
     "polymer": "Polymer/polymer#^1.0.0",
     "promise-polyfill": "git://github.com/PolymerLabs/promise-polyfill.git#~1.0.0",
     "yarn-endpoints-behavior": "~0.1.2"
