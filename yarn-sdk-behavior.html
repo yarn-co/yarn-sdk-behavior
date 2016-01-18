@@ -23,13 +23,13 @@ var SDKBehaviorImpl = {
       type: String,
       value: 'http'
     },
-    defaultAuthentication: {
+    defaultHeaders: {
       type: Object,
       value: {}
     },
     simLatency: {
       type: Boolean,
-      value: true
+      value: false
     },
     _body: {
       type: Object,
@@ -109,7 +109,7 @@ var SDKBehaviorImpl = {
           self[endpoint] = function(params, cb) {
             
             if(self.sdkPreRequestHook) {
-              self.sdkPreRequestHook(self.endpoints[endpoint], null, params, cb);
+              self.sdkPreRequestHook(self.endpoints[endpoint], null, params);
             }
             
             if(typeof params === 'function') {
@@ -148,7 +148,7 @@ var SDKBehaviorImpl = {
             }
             
             if(self.sdkPreRequestHook) {
-              self.sdkPreRequestHook(self.endpoints[endpoint], body, params, cb);
+              self.sdkPreRequestHook(self.endpoints[endpoint], body, params);
             }
             
             self.set('_body', body);
@@ -176,29 +176,17 @@ var SDKBehaviorImpl = {
           self.set('host', self.defaultHost);
         }
         if(self.endpoints[endpoint].headers) {
-          self._setHeaders(self.endpoints[endpoint].headers);
-        } else {
-          self._setHeaders({});
-        }
-        if(self.endpoints[endpoint].authentication) {
           
-          var endpointAuth = self.endpoints[endpoint].authentication;
+          var endpointHeaders = self.endpoints[endpoint].headers;
           
-          if(typeof endpointAuth === 'object') {
-            var tmp = self.ajax.headers;
-            Object.keys(endpointAuth).forEach(function(key) {
-              tmp[key] = endpointAuth[key];
-            });
-            self._setHeaders(tmp);
-          } else if(endpointAuth === true || endpointAuth === 'default') {
-            var tmp = self.ajax.headers;
-            
-            Object.keys(self.defaultAuthentication).forEach(function(key) {
-              tmp[key] = self.defaultAuthentication[key];
-            });
-            self._setHeaders(tmp);
+          if(typeof endpointHeaders === 'object') {
+            self._setHeaders(endpointHeaders);
+          } else if(endpointHeaders === 'default') {
+            self.setHeaders(self.defaultHeaders);
           }
           
+        } else {
+          self._setHeaders({});
         }
         if(self.endpoints[endpoint].protocol) {
           self.set('protocol', self.endpoints[endpoint].protocol);
@@ -262,7 +250,6 @@ var SDKBehaviorImpl = {
           
           var promiseResolve;
           var promiseReject;
-          var ajaxRequest;
           
           function callResponseHookIfExists(err, request) {
             if(sdkResponseHook) {
