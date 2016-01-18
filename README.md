@@ -3,11 +3,11 @@ SDKBehavior makes it super easy to use your APIs in Polymer!
 
 install with `bower install yarn-sdk-behavior`
 
-This behavior is intended to be used to create a Polymer element to interface with organized groups of API endpoints you want to use in your project.
+This behavior is a tool to help create sdk elements that interface with organized groups of API endpoints you want to use in your project.
 
 Sdk behavior allows you to make api calls like this:
 
-(From here on out, the above api calls will be referred to as your **business logic api calls**)
+(From here on out, the functions in the example below will be referred to as your **business logic api calls**)
 ```
 <link rel="import" href="../path/to/element/my-sdk/my-sdk.html">
 
