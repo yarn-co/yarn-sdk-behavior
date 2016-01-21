@@ -1,6 +1,6 @@
 {
   "name": "yarn-sdk-behavior",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "keywords": [
     "web-components",
     "polymer",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "description": "Polymer v1 API integration toolkit",
   "authors": [
-    "William S. Woodruff <williamswoodruff@gmail.com>"
+    "William S. Woodruff <bill@bigroomstudios.com>"
   ],
   "repository": {
     "type": "git",

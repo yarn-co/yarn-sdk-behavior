@@ -182,7 +182,7 @@ var SDKBehaviorImpl = {
           if(typeof endpointHeaders === 'object') {
             self._setHeaders(endpointHeaders);
           } else if(endpointHeaders === 'default') {
-            self.setHeaders(self.defaultHeaders);
+            self._setHeaders(self.defaultHeaders);
           }
           
         } else {
