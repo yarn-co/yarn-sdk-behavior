@@ -218,7 +218,9 @@ var SDKBehaviorImpl = {
         
         if(typeof cb == 'function') {
           
-          self.ajax.generateRequest().completes.then(function(request) {
+          var request = self.ajax.generateRequest()
+          
+          request.completes.then(function(request) {
             
             if(sdkResponseHook) {
               sdkResponseHook(null, request, cb, function() {
@@ -231,7 +233,7 @@ var SDKBehaviorImpl = {
           })
           .catch(function(reason) {
             
-            var status = String(reason).substr(-3);
+            var status = request.xhr.status;
             
             if(reason.type=="error" || (status == 400 || status >= 402) && status < 600) {
               self.fire('sdk-error', {sdk: self, reason:reason});
@@ -239,10 +241,10 @@ var SDKBehaviorImpl = {
             
             if(sdkResponseHook) {
               sdkResponseHook(reason, null, cb, function() {
-                cb(reason, null);
+                cb(reason, request);
               });
             } else {
-              cb(reason, null);
+              cb(reason, request);
             }
           });
           
