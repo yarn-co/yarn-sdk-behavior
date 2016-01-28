@@ -289,10 +289,9 @@ var endpoints = {
   sendMail: {
     method: "POST",
     headers: {Authorization: 'jsonWebToken--oi2jio2j3rj23rj23908fj092iefm'},
-    path: '/send/mail/to/{place}
+    path: '/send/mail/to/{place}'
   }
 }
-////////////
 
 
 // In business logic element
