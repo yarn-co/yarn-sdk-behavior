@@ -22,7 +22,7 @@
     "iron-ajax": "PolymerElements/iron-ajax#1.1.1",
     "polymer": "Polymer/polymer#^1.0.0",
     "promise-polyfill": "git://github.com/PolymerLabs/promise-polyfill.git#~1.0.0",
-    "yarn-endpoints-behavior": "~0.1.2"
+    "yarn-endpoints-behavior": "~0.1.4"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#^1.0.0",
