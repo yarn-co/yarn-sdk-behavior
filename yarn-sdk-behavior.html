@@ -123,12 +123,6 @@ var SDKBehaviorImpl = {
       "requests": requestsInfo
     });
     
-    console.log(' ');
-    console.warn('batching:');
-    requestsInfo.forEach(function(req) {
-      console.warn(req.path);
-    });
-    
     this._setHeaders(this.defaultHeaders);
     
     var request = this.ajax.generateRequest();
