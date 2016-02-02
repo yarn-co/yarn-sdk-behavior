@@ -386,7 +386,7 @@ var SDKBehaviorImpl = {
               }
               
               var bassmasterRequest = {
-                requestInfo: {"method": self.endpoints[endpoint].method, "path": self.path, "query": self.params},
+                requestInfo: {"method": self.endpoints[endpoint].method, "path": self.path},
                 callback: {
                   type: 'promise',
                   func: bassmasterPromise.bind(this)
