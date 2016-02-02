@@ -123,6 +123,7 @@ var SDKBehaviorImpl = {
       "requests": requestsInfo
     });
     
+    console.log(' ');
     console.warn('batching:');
     requestsInfo.forEach(function(req) {
       console.warn(req.path);
@@ -136,14 +137,15 @@ var SDKBehaviorImpl = {
     request.completes.then(function(request) {
       var res = request.xhr.response;
       
-      console.log(res);
-      
       bassmasterHostList.forEach(function(r, i) {
+        var status;
+        if(res[i] && res[i].error){status = res[i].statusCode}
+          else {status = request.xhr.status};
         var fakeXhr = {
           _responseType: request.xhr._responseType,
           response: res[i],
           readyState: request.xhr.readyState,
-          status: request.xhr.status,
+          status: status,
           withCredentials: request.xhr.withCredentials
         }
         var fakeRequest = {
@@ -156,11 +158,10 @@ var SDKBehaviorImpl = {
         
       });
     })
-    .catch(function(reason) {
-      if(reason.type==="error" || (status === 400 || status >= 402) && status < 600) {
-        self.fire('sdk-error', {sdk: self, reason:reason});
-      }
-      console.warn(reason);
+    .catch(function(err) {
+      
+      self._checkError(err, request);
+      
     });
     
   },
@@ -303,7 +304,7 @@ var SDKBehaviorImpl = {
             
             var bassmasterRequest = {
               
-              requestInfo: {"method": self.endpoints[endpoint].method, "path": self.endpoints[endpoint].path},
+              requestInfo: {"method": self.endpoints[endpoint].method, "path": self.path},
               callback: {
                 type: 'callback',
                 func: bassmasterCallback.bind(this)
@@ -326,21 +327,20 @@ var SDKBehaviorImpl = {
               callbackCallResponseHookIfExists(null, request);
               
             })
-            .catch(function(reason) {
+            .catch(function(err) {
               
-              var status = request.xhr.status;
-              
-              if(reason.type==="error" || (status === 400 || status >= 402) && status < 600) {
-                self.fire('sdk-error', {sdk: self, reason:reason});
-              }
-              
-              callbackCallResponseHookIfExists(reason, request);
+              callbackCallResponseHookIfExists(err, request);
               
             });
           }
           
           // Function callback version
           function callbackCallResponseHookIfExists(err, request) {
+            
+            if(err) {
+              self._checkError(err, request);
+            }
+            
             if(sdkResponseHook) {
               
               sdkResponseHook(err, request, cb, function() {
@@ -357,7 +357,8 @@ var SDKBehaviorImpl = {
           function bassmasterCallback(result, request) {
             
             if(result && result.error) {
-              callbackCallResponseHookIfExists(result.error, request);
+              
+              callbackCallResponseHookIfExists(result, request);
               
             } else {
               
@@ -390,10 +391,8 @@ var SDKBehaviorImpl = {
                 }, 50);
               }
               
-              // alert(self.url);
-              
               var bassmasterRequest = {
-                requestInfo: {"method": self.endpoints[endpoint].method, "path": self.endpoints[endpoint].path, "query": self.params},
+                requestInfo: {"method": self.endpoints[endpoint].method, "path": self.path, "query": self.params},
                 callback: {
                   type: 'promise',
                   func: bassmasterPromise.bind(this)
@@ -417,9 +416,9 @@ var SDKBehaviorImpl = {
                 promiseCallResponseHookIfExists(null, request);
                 
               })
-              .catch(function(reason) {
+              .catch(function(err) {
                 
-                promiseCallResponseHookIfExists({req: request, error:reason}, null);
+                promiseCallResponseHookIfExists({req: request, error:err}, request);
                 
               });
             }
@@ -427,10 +426,6 @@ var SDKBehaviorImpl = {
           
           // Promise callback version
           function promiseCallResponseHookIfExists(err, request) {
-            
-            if(request.xhr.status >= 400 && request.xhr.status < 600) {
-              self.fire('sdk-error', {sdk: self, request:request});
-            }
             
             if(sdkResponseHook) {
               var promiseResolveReject = {resolve: promiseResolve, reject: promiseReject};
@@ -443,6 +438,7 @@ var SDKBehaviorImpl = {
               });
             } else {
               if(err) {
+                self._checkError(err, request);
                 promiseReject(err);
               } else {
                 promiseResolve(request);
@@ -454,16 +450,14 @@ var SDKBehaviorImpl = {
           function bassmasterPromise(result, request) {
             
             if(result && result.error) {
-              promiseCallResponseHookIfExists(result.error, request);
+              promiseCallResponseHookIfExists(result, request);
               
             } else {
               
               promiseCallResponseHookIfExists(null, request);
             }
           }
-          
         }
-        
       }
       
       if(!self.host) {
@@ -501,7 +495,17 @@ var SDKBehaviorImpl = {
         }
       }
     });
+  },
+  
+  _checkError: function(err, req) {
+    
+    var status = req.xhr.status;
+    
+    if((status === 400 || status >= 402) && status < 600) {
+      this.fire('sdk-error', {sdk: this, err:err});
+    }
   }
+  
 };
 
 YarnBehaviors.SDKBehavior = [YarnBehaviors.EndpointsBehavior, SDKBehaviorImpl];
