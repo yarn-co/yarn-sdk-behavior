@@ -282,6 +282,38 @@ var SDKBehaviorImpl = {
           
           // This is a function-style callback
           
+          // Function callback version
+          function callbackCallResponseHookIfExists(err, request) {
+            
+            if(err) {
+              self._checkError(err, request);
+            }
+            
+            if(sdkResponseHook) {
+              
+              sdkResponseHook(err, request, cb, function() {
+                cb(err, request);
+              });
+              
+            } else {
+              
+              cb(err, request);
+            }
+          }
+          
+          // Function callback version
+          function bassmasterCallback(result, request) {
+            
+            if(result && result.error) {
+              
+              callbackCallResponseHookIfExists(result, request);
+              
+            } else {
+              
+              callbackCallResponseHookIfExists(null, request);
+            }
+          }
+          
           if(self.bassmasterMode === true && self.endpoints[endpoint].bassmaster !== false 
                || self.endpoints[endpoint].bassmaster === true) {
             
@@ -328,38 +360,6 @@ var SDKBehaviorImpl = {
             });
           }
           
-          // Function callback version
-          function callbackCallResponseHookIfExists(err, request) {
-            
-            if(err) {
-              self._checkError(err, request);
-            }
-            
-            if(sdkResponseHook) {
-              
-              sdkResponseHook(err, request, cb, function() {
-                cb(err, request);
-              });
-              
-            } else {
-              
-              cb(err, request);
-            }
-          }
-          
-          // Function callback version
-          function bassmasterCallback(result, request) {
-            
-            if(result && result.error) {
-              
-              callbackCallResponseHookIfExists(result, request);
-              
-            } else {
-              
-              callbackCallResponseHookIfExists(null, request);
-            }
-          }
-          
         } else {
           
           // This is a promise style callback
@@ -370,6 +370,41 @@ var SDKBehaviorImpl = {
             
             promiseResolve = resolve;
             promiseReject = reject;
+            
+            
+            // Promise callback version
+            function promiseCallResponseHookIfExists(err, request) {
+              
+              if(sdkResponseHook) {
+                var promiseResolveReject = {resolve: promiseResolve, reject: promiseReject};
+                sdkResponseHook(err, request, promiseResolveReject, function() {
+                  if(err) {
+                    promiseReject(err);
+                  } else {
+                    promiseResolve(request);
+                  }
+                });
+              } else {
+                if(err) {
+                  self._checkError(err, request);
+                  promiseReject(err);
+                } else {
+                  promiseResolve(request);
+                }
+              }
+            }
+            
+            // Promise callback version
+            function bassmasterPromise(result, request) {
+              
+              if(result && result.error) {
+                promiseCallResponseHookIfExists(result, request);
+                
+              } else {
+                
+                promiseCallResponseHookIfExists(null, request);
+              }
+            }
             
             if(self.bassmasterMode === true && self.endpoints[endpoint].bassmaster !== false 
                || self.endpoints[endpoint].bassmaster === true) {
@@ -417,40 +452,6 @@ var SDKBehaviorImpl = {
               });
             }
           });
-          
-          // Promise callback version
-          function promiseCallResponseHookIfExists(err, request) {
-            
-            if(sdkResponseHook) {
-              var promiseResolveReject = {resolve: promiseResolve, reject: promiseReject};
-              sdkResponseHook(err, request, promiseResolveReject, function() {
-                if(err) {
-                  promiseReject(err);
-                } else {
-                  promiseResolve(request);
-                }
-              });
-            } else {
-              if(err) {
-                self._checkError(err, request);
-                promiseReject(err);
-              } else {
-                promiseResolve(request);
-              }
-            }
-          }
-          
-          // Promise callback version
-          function bassmasterPromise(result, request) {
-            
-            if(result && result.error) {
-              promiseCallResponseHookIfExists(result, request);
-              
-            } else {
-              
-              promiseCallResponseHookIfExists(null, request);
-            }
-          }
         }
       }
       
