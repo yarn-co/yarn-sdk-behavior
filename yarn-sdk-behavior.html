@@ -129,7 +129,8 @@ var SDKBehaviorImpl = {
     
     var self = this;
     request.completes.then(function(request) {
-      var res = request.xhr.response;
+      var res = req.xhr.response;
+      res = (typeof res == "string" ?  JSON.parse(res) : res);
       
       bassmasterHostList.forEach(function(r, i) {
         var status;
