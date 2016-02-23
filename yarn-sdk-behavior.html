@@ -104,16 +104,17 @@ var SDKBehaviorImpl = {
     this.ajax.set('headers', newVal);
   },
   
-  makeBassmasterCall: function(forHost) {
-    var bassmasterHostList = bassmaster[forHost];
-    delete bassmaster[forHost];
+  makeBassmasterCall: function(forProtocol, forHost, forGroup) {
+    var hostBatchGroup = forHost + forGroup;
+    
+    var bassmasterHostList = bassmaster[hostBatchGroup];
+    delete bassmaster[hostBatchGroup];
     
     this.set('host', forHost);
     
     this.set('_method', 'POST');
     
-    // Only https for now, ok?
-    this.ajax.set('url', 'https://' + forHost);
+    this.ajax.set('url', forProtocol + '://' + forHost);
     var requestsInfo = [];
     bassmasterHostList.forEach(function(r) {
       requestsInfo.push(r.requestInfo);
@@ -130,7 +131,6 @@ var SDKBehaviorImpl = {
     var self = this;
     request.completes.then(function(request) {
       var res = request.xhr.response;
-      res = (typeof res == "string" ?  JSON.parse(res) : res);
       
       bassmasterHostList.forEach(function(r, i) {
         var status;
@@ -319,12 +319,21 @@ var SDKBehaviorImpl = {
                || self.endpoints[endpoint].bassmaster === true) {
             
             // Function style callback batch mode
+            
             var host = self.host;
-            if(typeof bassmaster[host] === 'undefined') {
+            var batchGroup = self.endpoints[endpoint].batchGroup;
+            if(batchGroup === 'undefined') {
+              batchGroup = 'default';
+            }
+            
+            var hostBatchGroup = host + batchGroup;
+            var protocol = self.protocol;
+            
+            if(typeof bassmaster[hostBatchGroup] === 'undefined') {
               
-              bassmaster[host] = [];
+              bassmaster[hostBatchGroup] = [];
               self.async(function() {
-                self.makeBassmasterCall(host);
+                self.makeBassmasterCall(protocol, host, batchGroup);
               }, 50);
             }
             
@@ -342,7 +351,7 @@ var SDKBehaviorImpl = {
               bassmasterRequest.requestInfo.payload = self._body;
             }
             
-            bassmaster[host].push(bassmasterRequest);
+            bassmaster[hostBatchGroup].push(bassmasterRequest);
             
           } else {
             
@@ -413,11 +422,20 @@ var SDKBehaviorImpl = {
               // Promise style callback batch mode
               
               var host = self.host;
-              if(typeof bassmaster[host] === 'undefined') {
+              
+              var batchGroup = self.endpoints[endpoint].batchGroup;
+              if(batchGroup === 'undefined') {
+                batchGroup = 'default';
+              }
+              
+              var hostBatchGroup = host + batchGroup;
+              var protocol = self.protocol;
+              
+              if(typeof bassmaster[hostBatchGroup] === 'undefined') {
                 
-                bassmaster[host] = [];
+                bassmaster[hostBatchGroup] = [];
                 self.async(function() {
-                  self.makeBassmasterCall(host);
+                  self.makeBassmasterCall(protocol, host, batchGroup);
                 }, 50);
               }
               
@@ -433,7 +451,7 @@ var SDKBehaviorImpl = {
                 bassmasterRequest.requestInfo.payload = self._body;
               }
               
-              bassmaster[host].push(bassmasterRequest);
+              bassmaster[hostBatchGroup].push(bassmasterRequest);
               
             } else {
               
