@@ -267,7 +267,7 @@ Inside e.detail, the object will have these properties:
 ```javascript
 {
   sdk: //the sdk element this behavior belongs to,
-  reason: //the error
+  err: //the error
 }
 ```
 
